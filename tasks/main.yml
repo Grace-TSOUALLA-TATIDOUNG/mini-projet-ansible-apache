@@ -1,0 +1,33 @@
+---
+- name: Install necessary package 
+  package: name='{{ item }}' state=present
+  when: ansible_distribution == "CentOS"
+  loop:
+    - epel-release
+    - wget
+    - git
+
+- name: download pip script
+  get_url:
+    url: "{{ pip_script_url }}"
+    dest: "{{ pip_dir }}"
+
+- name: install python-pip
+  command: python2.7 "{{ pip_dir }}"
+
+- name: Install docker python
+  pip: name=docker-py
+
+- name: Copy website file template
+  template:
+    src: index.html.j2
+    dest: "{{ app_dir }}/index.html"
+
+- name: Create Apache container
+  docker_container:
+    name: "{{ container_name}}"
+    image: httpd
+    ports:
+      - "80:80"
+    volumes:
+      - "{{ app_dir }}/index.html":/usr/local/apache2/htdocs/index.html
