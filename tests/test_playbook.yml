@@ -1,0 +1,16 @@
+---
+- name: "Apache installation using docker"
+  hosts: prod
+  become: true
+  vars_files:
+    - files/secrets/credentials.yml
+
+- name: Verify Apache container is running
+  docker_container_info:
+    name: "{{ container_name}}"
+  register: container_info
+
+- name: Assert Apache container is running
+  assert:
+    that:
+      - container_info.state.running
